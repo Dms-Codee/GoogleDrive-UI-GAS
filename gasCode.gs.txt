@@ -1,0 +1,56 @@
+
+// Para poder mostrar la pagina en la webapp
+function doGet() {
+  var template = HtmlService.createTemplateFromFile('index');
+  var output = template.evaluate();
+  return output;
+}
+
+
+
+// Para poder desacoplar el codigo dentro del frontend
+function include(fileName) {
+  return HtmlService.createHtmlOutputFromFile(fileName).getContent();
+}
+
+//Funcion que obtiene el acceso al contenido e informacion de una carpeta especifica de Drive utilizando su Id
+function driveInfoFolders() {
+  // Aqui agregas el ID de Tu Folder 
+  var folderMain = DriveApp.getFolderById();
+  var files = folderMain.getFolders();
+  var listado = [];
+  while (files.hasNext()) {
+    var file = files.next();
+    var item = {
+      nombreFolder: file.getName(),
+      url: file.getUrl(),
+      descripcion: file.getDescription()
+    }
+    listado.push(item);
+  }
+  return listado;
+}
+
+
+// Generacion del HTML, especificamente las cards que se renderizara en la vista Index del lado del cliente
+function crearCards() {
+  var ourHTMLString = "";
+  var data = driveInfoFolders();
+
+  data.forEach((carpeta,i) => {
+    ourHTMLString += `
+        <div class="card col-sm-12 col-md-4 col-lg-3 m-3" >
+        <div class="card-body">
+          <h5 class="card-title">  ${carpeta.nombreFolder} </h5>
+          <p class="card-text">${carpeta.descripcion == null ? "Sin descripcion" : carpeta.descripcion}</p>
+          <a href="${carpeta.url}" target="_blank" class="btn btn-success">Ir a Carpeta</a>
+ 
+         <button id="${i}" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+          Info
+         </button>
+        </div>
+      </div>  `
+  })
+
+  return ourHTMLString;
+}
